@@ -1,3 +1,4 @@
+import javax.xml.ws.handler.HandlerResolver;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -8,6 +9,14 @@ public class solver {
         Maze maze = solver.fetchMazeMap();
 
         solver.mapNodes(maze);
+
+        // Strategy pattern implementation
+        SolveContext solve = new SolveContext(new depthfirst());
+        solve.solve(maze);
+
+
+
+        System.out.println("Nodes created: " + maze.nodes.size());
     }
 
     public Maze fetchMazeMap()
@@ -46,10 +55,6 @@ public class solver {
         maze.setMaze(mazeArr);
 
         maze.print();
-
-        System.out.print(Arrays.toString(maze.begin));
-        System.out.print(Arrays.toString(maze.end));
-
         return maze;
     }
 
@@ -66,7 +71,7 @@ public class solver {
                 // If location is a wall, do nothing
                 if (filledIn != 1) {
                     // Not the top row, check for additional values
-                    if (y > 0){
+                    if (y > 0 && y < (maze.height - 1)){
                         int prev;
                         int next;
                         int up;
@@ -94,34 +99,48 @@ public class solver {
                         }
 
                         // Get position down value
-                        if (y < maze.height) {
+                        if (y < (maze.height - 1)) {
                             down = maze.maze[y + 1][x];
                         } else {
                             down = 1;
                         }
 
 
-
-
+                        /**
+                         * Solving logic
+                         */
                         if (prev == 0) {
-                            if (next == 0)
-                            // Path, only create new node when theres a path above and down
+                            if (next == 0) {
+                                // Path, only create new node when theres a path above and down
 
-                            if (up == 0 || down == 0) {
+                                if (up == 0 || down == 0) {
+                                    maze.createNode(y, x);
+                                }
+                            } else {
+                                // Prev = 0, next = 1. We're hitting a wall, create a node
                                 maze.createNode(y, x);
                             }
+
                             // Previous is a wall, we'll need a new node
                         } else {
                             if (next == 0) {
                                 maze.createNode(y, x);
+                            } else {
+                                if (up == 1 || down == 1) {
+                                    maze.createNode(y, x);
+                                }
                             }
                         }
 
+                    } else if (y == 0) {
+                        // Start node
+                        Node startNode = maze.createNode(y, x);
+                        maze.start = startNode;
 
-
-
-                    } else {
-                        maze.createNode(y, x);
+                    } else if (y == (maze.height - 1)) {
+                        // End node
+                        Node endNode = maze.createNode(y, x);
+                        maze.end = endNode;
                     }
                 }
 

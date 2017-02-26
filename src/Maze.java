@@ -1,5 +1,4 @@
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by harmakkerman on 2/26/17.
@@ -11,20 +10,26 @@ public class Maze {
     public int height;
     public int width;
 
-    public int[] begin = new int[2];
-    public int[] end = new int[2];
 
-    public List<Node> nodes;
+    Node start = null;
+    Node end = null;
+
+    Map<Integer, Node> topRows = new HashMap<Integer, Node>();
+
+
+    public List<Node> nodes = new ArrayList<Node>();
 
     public Node lastNode = null;
+
+    public Maze()
+    {
+    }
 
     public void setMaze(int[][] maze)
     {
         this.maze = maze;
 
         this.setDimensionAccessors();
-        this.determineBegin();
-        this.determineEnd();
     }
 
     // Conveniant way to print the maze
@@ -50,34 +55,13 @@ public class Maze {
         }
     }
 
-    // Get Y, X coordinates of the beginning of the maze
-    private void determineBegin()
-    {
-        for(int i = 0; i < this.maze[0].length; i++)
-        {
-            if (this.maze[0][i] == 0)
-            {
-                this.begin[0] = 0;
-                this.begin[1] = i;
-                break;
-            }
-
-        }
+    public void addNewTopRow(int x, Node node) {
+        this.topRows.put(x, node);
     }
 
-    // Get Y, X coordinates of the end of the maze
-    private void determineEnd()
-    {
-
-        int endArray = this.maze.length - 1;
-        for(int i = 0; i < this.maze[endArray].length; i++)
-        {
-            if (this.maze[endArray][i] == 0)
-            {
-                this.end[0] = endArray;
-                this.end[1] = i;
-            }
-        }
+    public Node getLowestTopRow(int x) {
+        Node node = this.topRows.get(x);
+        return node;
     }
 
     public Node createNode(int y, int x)
@@ -93,7 +77,17 @@ public class Maze {
         if (this.lastNode != null) {
             node.west = this.getLastNode();
         }
+
+        Node northNode = this.getLowestTopRow(node.xPos);
+        if (northNode != null) {
+            node.north = northNode;
+            northNode.south = node;
+        }
+
+        System.out.print(node);
         this.nodes.add(node);
+        this.topRows.put(node.xPos, node);
+        System.out.println("Node has been added");
     }
 
     public List<Node> getNodes()
