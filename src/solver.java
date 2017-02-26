@@ -1,6 +1,12 @@
+import javax.imageio.ImageIO;
 import javax.xml.ws.handler.HandlerResolver;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.*;
+import java.util.List;
 
 public class solver {
     public static void main(String [] args)
@@ -12,7 +18,9 @@ public class solver {
 
         // Strategy pattern implementation
         SolveContext solve = new SolveContext(new depthfirst());
-        solve.solve(maze);
+        ArrayList<Node> path = solve.solve(maze);
+
+        solver.generateImage(maze, path);
 
 
 
@@ -147,5 +155,51 @@ public class solver {
                 leftnode = maze.getLastNode();
             }
         }
+    }
+
+    public void generateImage(Maze maze, ArrayList<Node> path)
+    {
+        BufferedImage newImage = new BufferedImage(maze.width, maze.height,
+                BufferedImage.TYPE_INT_ARGB);
+
+        List<Point2D> nodePositions = new ArrayList<Point2D>();
+
+        for (Node node: path){
+
+            Point2D n = new Point2D.Double(node.xPos, node.yPos);
+            nodePositions.add(n);
+        }
+
+        for (int y = 0; y < maze.height; y++) {
+            for (int x = 0; x < maze.width; x ++) {
+                int r = ((x / maze.width) * 255);
+
+                Point2D check = new Point2D.Double(x, y);
+
+                if (nodePositions.contains(check)) {
+                    // Node position
+                    Color c = new Color(r, 0, 255 - r);
+                    newImage.setRGB(x, y, c.getRGB());
+                } else {
+                    if (maze.getValue(y, x) == 1) {
+                        newImage.setRGB(x, y, Color.BLACK.getRGB());
+                    } else {
+                        newImage.setRGB(x, y, Color.WHITE.getRGB());
+                    }
+                }
+            }
+        }
+
+
+
+        File outputfile = new File("test.png");
+        try {
+            ImageIO.write(newImage, "png", outputfile);
+        } catch (IOException e) {
+
+        }
+
+
+
     }
 }
