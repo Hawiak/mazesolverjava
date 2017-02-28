@@ -59,9 +59,29 @@ public class Maze {
         this.topRows.put(x, node);
     }
 
-    public Node getLowestTopRow(int x) {
+    public Node getLowestTopRow(int x, Node otherNode) {
         Node node = this.topRows.get(x);
-        return node;
+
+        int y1 = otherNode.yPos;
+
+        if (node != null) {
+            int y2 = node.yPos;
+            boolean possible = true;
+
+            for (int i = y1; i > y2; i--) {
+                if (this.getValue(i, otherNode.xPos) == 1) {
+                    possible = false;
+                }
+            }
+
+            if (!possible) {
+                return null;
+            } else {
+                return node;
+            }
+        } else {
+            return null;
+        }
     }
 
     public Node createNode(int y, int x)
@@ -78,16 +98,17 @@ public class Maze {
             node.west = this.getLastNode();
         }
 
-        Node northNode = this.getLowestTopRow(node.xPos);
+        Node northNode = this.getLowestTopRow(node.xPos, node);
         if (northNode != null) {
             node.north = northNode;
             northNode.south = node;
         }
 
-        System.out.print(node);
+
         this.nodes.add(node);
         this.topRows.put(node.xPos, node);
-        System.out.println("Node has been added");
+
+        System.out.println("Node: on X: " + node.xPos + " and Y: " + node.yPos);
     }
 
     public List<Node> getNodes()

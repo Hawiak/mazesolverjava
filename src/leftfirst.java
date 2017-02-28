@@ -3,7 +3,7 @@ import java.util.*;
 /**
  * Created by harmakkerman on 2/26/17.
  */
-public class depthfirst implements SolveStrategy{
+public class leftfirst implements SolveStrategy{
 
     private List<Node> visited = new ArrayList<Node>();
 
@@ -65,10 +65,10 @@ public class depthfirst implements SolveStrategy{
     public Node getNext(Node node) {
         // South > West > east
 
-        if (node.south != null && !this.visited.contains(node.south)) {
-            return node.south;
-        } else if (node.west != null && !this.visited.contains(node.west)) {
+        if (node.west != null && !this.visited.contains(node.west)) {
             return node.west;
+        } else if (node.south != null && !this.visited.contains(node.south)) {
+            return node.south;
         } else if (node.east != null && !this.visited.contains(node.west)) {
             return node.east;
         } else {

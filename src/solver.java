@@ -1,5 +1,4 @@
 import javax.imageio.ImageIO;
-import javax.xml.ws.handler.HandlerResolver;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -9,6 +8,9 @@ import java.util.*;
 import java.util.List;
 
 public class solver {
+
+    public Image image;
+
     public static void main(String [] args)
     {
         solver solver = new solver();
@@ -29,18 +31,18 @@ public class solver {
 
     public Maze fetchMazeMap()
     {
-        ImageProvider imageProvider = new ImageProvider();
+        this.image = new Image();
 
         byte[] imageBytemap = new byte[0];
 
         try {
-            imageBytemap = imageProvider.extractBytes("tiny.png");
+            imageBytemap = this.image.extractBytes("tiny.png");
         } catch (IOException exception) {
             System.out.println(exception.getMessage());
         }
 
-        int imageHeight = imageProvider.bufferedImage.getHeight();
-        int imageWidth = imageProvider.bufferedImage.getWidth();
+        int imageHeight = this.image.bufferedImage.getHeight();
+        int imageWidth = this.image.bufferedImage.getWidth();
 
 
         int[][] mazeArr = new int[imageWidth][imageHeight];
@@ -49,7 +51,7 @@ public class solver {
             mazeArr[y] = new int[imageHeight];
             for (int x = 0; x < imageWidth; x++) {
                 int black = 0;
-                final int clr = imageProvider.bufferedImage.getRGB(x, y);
+                final int clr = this.image.bufferedImage.getRGB(x, y);
                 if (clr == -16777216) {
                     black = 1;
                 } else if (clr == -1){
@@ -159,8 +161,6 @@ public class solver {
 
     public void generateImage(Maze maze, ArrayList<Node> path)
     {
-        BufferedImage newImage = new BufferedImage(maze.width, maze.height,
-                BufferedImage.TYPE_INT_ARGB);
 
         List<Point2D> nodePositions = new ArrayList<Point2D>();
 
@@ -170,7 +170,58 @@ public class solver {
             nodePositions.add(n);
         }
 
-        for (int y = 0; y < maze.height; y++) {
+        BufferedImage bufImg = this.image.bufferedImage;
+        BufferedImage convertedImg = new BufferedImage(bufImg.getWidth(), bufImg.getHeight(), BufferedImage.TYPE_USHORT_565_RGB);
+        convertedImg.getGraphics().drawImage(bufImg, 0, 0, null);
+
+        for (int i = 0; i < path.size(); i++) {
+            Node curNode = path.get(i);
+            Node nextNode = null;
+
+            if (i < (path.size() - 1)) {
+                nextNode = path.get(i + 1);
+            } else {
+                nextNode = maze.end;
+            }
+
+            int x1 = curNode.xPos;
+            int x2 = nextNode.xPos;
+
+            int y1 = curNode.yPos;
+            int y2 = nextNode.yPos;
+
+            System.out.println("x1: " + x1 + ", y1: " + y1 + ", x2: " + x2 + ", y2: " + y2);
+
+            int blue = ((255 / path.size()) * i);
+
+            Color c = new Color(155, 0, blue);
+
+
+            if (y1 != y2) {
+                if (y1 < y2) {
+                    for (int y = y1; y <= y2; y++) {
+                        convertedImg.setRGB(x1, y, c.getRGB());
+                    }
+                } else {
+                    for (int y = y2; y >= y1; y--) {
+                        convertedImg.setRGB(x1, y, c.getRGB());
+                    }
+                }
+            }
+            if (x1 != x2) {
+                if (x1 < x2) {
+                    for (int x = x1; x <= x2; x++) {
+                        convertedImg.setRGB(x, y1, c.getRGB());
+                    }
+                } else {
+                    for (int x = x1; x >= x2; x--) {
+                        convertedImg.setRGB(x, y1, c.getRGB());
+                    }
+                }
+            }
+        }
+
+        /*for (int y = 0; y < maze.height; y++) {
             for (int x = 0; x < maze.width; x ++) {
                 int r = ((x / maze.width) * 255);
 
@@ -188,13 +239,13 @@ public class solver {
                     }
                 }
             }
-        }
+        }*/
 
 
 
         File outputfile = new File("test.png");
         try {
-            ImageIO.write(newImage, "png", outputfile);
+            ImageIO.write(convertedImg, "png", outputfile);
         } catch (IOException e) {
 
         }

@@ -9,7 +9,7 @@ import java.nio.Buffer;
 /**
  * Created by harmakkerman on 2/26/17.
  */
-public class ImageProvider {
+public class Image {
 
     public File file;
     public BufferedImage bufferedImage;
